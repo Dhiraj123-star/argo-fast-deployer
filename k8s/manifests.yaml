@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment 
+metadata:
+  name: argofast-api
+  labels:
+    app: argofast
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: argofast
+  template:
+    metadata:
+      labels:
+        app: argofast
+    spec:
+      containers:
+        - name: fastapi-container
+          image: dhiraj918106/argo-fast-deployer:latest
+          imagePullPolicy: Always
+          ports:
+          - containerPort: 80
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service 
+metadata:
+  name: argofast-service
+spec:
+  selector:
+    app: argofast
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
