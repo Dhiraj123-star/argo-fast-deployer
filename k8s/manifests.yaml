@@ -1,25 +1,36 @@
 apiVersion: apps/v1
 kind: Deployment 
 metadata:
-  name: argofast-api
+  name: zero-downtime-api
   labels:
-    app: argofast
+    app: zero-downtime
 spec:
   replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
   selector:
     matchLabels:
-      app: argofast
+      app: zero-downtime
   template:
     metadata:
       labels:
-        app: argofast
+        app: zero-downtime
     spec:
       containers:
         - name: fastapi-container
-          image: dhiraj918106/argo-fast-deployer:latest
+          image: dhiraj918106/zero-downtime-api:latest
           imagePullPolicy: Always
           ports:
           - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
           resources:
             requests:
               memory: "256Mi"
@@ -31,10 +42,10 @@ spec:
 apiVersion: v1
 kind: Service 
 metadata:
-  name: argofast-service
+  name: zero-downtime-service
 spec:
   selector:
-    app: argofast
+    app: zero-downtime
   ports:
     - protocol: TCP
       port: 80

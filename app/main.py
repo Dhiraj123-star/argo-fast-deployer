@@ -6,7 +6,10 @@ app = FastAPI()
 def read_root():
     return {
         "status":"online",
-        "system":"ArgoFast-Deployer",
+        "system":"Zero-Downtime-FastAPI",
         "version":"1.0.0"
     
     }
+@app.get("/health")
+def health_check():
+    return {"status":"healthy"}

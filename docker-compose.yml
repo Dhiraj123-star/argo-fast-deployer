@@ -1,6 +1,6 @@
 services:
   api:
     build: .
-    container_name: argo-fast-api
+    container_name: zero-downtime-api
     ports:
-      - "8000:8000"
+      - "8000:80"
