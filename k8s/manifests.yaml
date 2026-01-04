@@ -24,11 +24,11 @@ spec:
           image: dhiraj918106/zero-downtime-api:latest
           imagePullPolicy: Always
           ports:
-          - containerPort: 80
+          - containerPort: 8000
           readinessProbe:
             httpGet:
               path: /health
-              port: 80
+              port: 8000
             initialDelaySeconds: 5
             periodSeconds: 10
           resources:
@@ -49,5 +49,5 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 80
+      targetPort: 8000
   type: LoadBalancer

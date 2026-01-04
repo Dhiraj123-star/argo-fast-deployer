@@ -7,7 +7,8 @@ def read_root():
     return {
         "status":"online",
         "system":"Zero-Downtime-FastAPI",
-        "version":"1.0.0"
+        "version":"1.1.0",
+        "message":"Update Successful!!"
     
     }
 @app.get("/health")
