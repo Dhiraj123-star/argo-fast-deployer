@@ -23,5 +23,5 @@ jobs:
           context: .
           push: true
           # this tags the image as latest
-          tags: dhiraj918106/argo-fast-deployer:latest 
+          tags: dhiraj918106/zero-downtime-api:latest 
           
