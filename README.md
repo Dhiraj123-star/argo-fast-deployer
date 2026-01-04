@@ -1,56 +1,53 @@
 
-# 🚀 ArgoFast-Deployer
+# 🚀 Zero-Downtime FastAPI
 
-A production-ready boilerplate for a **FastAPI** application, containerized with **Docker**, and prepared for GitOps-style deployment using **ArgoCD**.
+A production-ready boilerplate for a **FastAPI** application, containerized with **Docker**, and optimized for **Zero-Downtime Deployments** using Kubernetes native Rolling Updates.
 
 ## 🛠 Tech Stack
 
 * **Backend:** FastAPI (Python 3.11)
 * **Containerization:** Docker
 * **Local Orchestration:** Docker Compose
-* **Continuous Deployment:** ArgoCD (GitOps)
-* **Orchestration:** Kubernetes
+* **CI/CD:** GitHub Actions & Docker Hub
+* **Orchestration:** Kubernetes (Minikube/Managed K8s)
 
 ---
 
 ## 📂 Project Structure
 
-* `app/`: Contains the FastAPI source code and logic.
-* `Dockerfile`: Build instructions for the application image.
-* `docker-compose.yml`: Local development setup for quick testing.
-* `k8s/`: Kubernetes manifests (Deployment & Service) monitored by ArgoCD.
+* `app/`: FastAPI source code (includes `/health` for readiness checks).
+* `Dockerfile`: Optimized multi-stage build.
+* `docker-compose.yml`: Local development environment (Port 8000).
+* `k8s/`: Kubernetes manifests with **RollingUpdate** strategy.
+* `.github/workflows/`: Automated CI/CD pipeline for Docker Hub.
 
 ---
 
-## 🚀 Recently Implemented
+## 🚀 Key Features Implemented
 
-### 1. FastAPI Application
+### 1. Zero-Downtime Strategy
 
-* Initialized a lightweight REST API.
-* Created a health-check root endpoint (`/`) returning system status and version.
-* Managed dependencies via `requirements.txt`.
+The Kubernetes Deployment is configured with:
 
-### 2. Docker Integration
+* **RollingUpdate:** Replaces pods one-by-one.
+* **maxUnavailable: 0**: Ensures the service never loses capacity during a deployment.
+* **Readiness Probes**: Kubernetes only sends traffic to new pods once the FastAPI server confirms it is "Ready" via the `/health` endpoint.
 
-* **Dockerfile:** Multi-layer build to optimize image size using `python-slim`.
-* **Docker Compose:** Set up a local environment mapping port `8000` to the container's port `80` for easy local debugging.
+### 2. Automated CI/CD
 
-### 3. Kubernetes Manifests
+* **GitHub Actions:** On every push to `main`, the image is automatically built and pushed to `dhiraj918106/argo-fast-deployer:latest`.
 
-* **Deployment:** Defined a scalable deployment (2 replicas) with resource labels.
-* **Service:** Configured a `LoadBalancer` service to expose the FastAPI app to external traffic.
+### 3. Resource Management
 
-### 4. ArgoCD Readiness
-
-* Organized the repository structure so ArgoCD can track the `/k8s` directory for automatic synchronization (GitOps).
+* Defined CPU/Memory **requests** and **limits** to ensure cluster stability and prevent container OOM (Out Of Memory) kills.
 
 ---
 
 ## 🛠 How to Run
 
-### Local Development
+### 1. Local Development (Docker Only)
 
-To start the app locally without Kubernetes:
+To test the app quickly without Kubernetes:
 
 ```bash
 docker-compose up --build
@@ -59,10 +56,33 @@ docker-compose up --build
 
 Access the API at: `http://localhost:8000`
 
-### Deployment (GitOps)
+### 2. Kubernetes Deployment (Initial)
 
-1. Push this repository to GitHub.
-2. Update the image name in `k8s/manifests.yaml` to your Docker Hub image.
-3. Connect the repository to **ArgoCD** and point it to the `k8s/` path.
+Ensure your Minikube is running, then apply the manifests:
+
+```bash
+kubectl apply -f k8s/manifests.yaml
+
+```
+
+### 3. Performing a Zero-Downtime Update
+
+When you push new code and the GitHub Action finishes, trigger the update manually:
+
+```bash
+# 1. Update the pods with the new image
+kubectl rollout restart deployment argofast-api
+
+# 2. Watch the pods transition (Zero-Downtime in action)
+kubectl get pods -w
+
+```
+
+---
+
+## 🔗 API Endpoints
+
+* `GET /`: Returns system status and version.
+* `GET /health`: Health check endpoint used by Kubernetes Readiness Probes.
 
 ---
