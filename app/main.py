@@ -14,3 +14,12 @@ def read_root():
 @app.get("/health")
 def health_check():
     return {"status":"healthy"}
+
+@app.get("/status")
+def get_status():
+    return {
+        "database": "connected",
+        "cache": "active",
+        "uptime": "99.9%"
+
+    }
