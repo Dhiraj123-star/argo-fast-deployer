@@ -1,10 +1,8 @@
-
 # 🚀 Zero-Downtime FastAPI
 
 A production-ready boilerplate for a **FastAPI** application, containerized with **Docker**, and optimized for **Zero-Downtime Deployments** using Kubernetes native Rolling Updates.
 
 ## 🛠 Tech Stack
-
 * **Backend:** FastAPI (Python 3.11)
 * **Containerization:** Docker
 * **Local Orchestration:** Docker Compose
@@ -14,7 +12,6 @@ A production-ready boilerplate for a **FastAPI** application, containerized with
 ---
 
 ## 📂 Project Structure
-
 * `app/`: FastAPI source code (includes `/health` for readiness checks).
 * `Dockerfile`: Optimized multi-stage build.
 * `docker-compose.yml`: Local development environment (Port 8000).
@@ -26,29 +23,24 @@ A production-ready boilerplate for a **FastAPI** application, containerized with
 ## 🚀 Key Features Implemented
 
 ### 1. Zero-Downtime Strategy
-
 The Kubernetes Deployment is configured with:
+* **RollingUpdate:** Gradual replacement of pods to ensure availability.
+* **maxSurge: 1**: Allows the cluster to spin up an extra pod before killing old ones.
+* **Readiness Probes**: Kubernetes only sends traffic to pods once the `/health` endpoint returns a success status on port `8000`.
 
-* **RollingUpdate:** Replaces pods one-by-one.
-* **maxUnavailable: 0**: Ensures the service never loses capacity during a deployment.
-* **Readiness Probes**: Kubernetes only sends traffic to new pods once the FastAPI server confirms it is "Ready" via the `/health` endpoint.
+
 
 ### 2. Automated CI/CD
-
-* **GitHub Actions:** On every push to `main`, the image is automatically built and pushed to `dhiraj918106/argo-fast-deployer:latest`.
+* **GitHub Actions:** Every push to `main` triggers a build and pushes the image to `dhiraj918106/zero-downtime-api:latest`.
 
 ### 3. Resource Management
-
-* Defined CPU/Memory **requests** and **limits** to ensure cluster stability and prevent container OOM (Out Of Memory) kills.
+* Defined CPU/Memory **requests** and **limits** to ensure cluster stability.
 
 ---
 
 ## 🛠 How to Run
 
 ### 1. Local Development (Docker Only)
-
-To test the app quickly without Kubernetes:
-
 ```bash
 docker-compose up --build
 
@@ -56,9 +48,9 @@ docker-compose up --build
 
 Access the API at: `http://localhost:8000`
 
-### 2. Kubernetes Deployment (Initial)
+### 2. Kubernetes Deployment
 
-Ensure your Minikube is running, then apply the manifests:
+Ensure Minikube is running, then apply the manifests:
 
 ```bash
 kubectl apply -f k8s/manifests.yaml
@@ -67,13 +59,13 @@ kubectl apply -f k8s/manifests.yaml
 
 ### 3. Performing a Zero-Downtime Update
 
-When you push new code and the GitHub Action finishes, trigger the update manually:
+After pushing code and the GitHub Action finishes, trigger the update:
 
 ```bash
-# 1. Update the pods with the new image
-kubectl rollout restart deployment argofast-api
+# 1. Force Kubernetes to pull the latest image and rotate pods
+kubectl rollout restart deployment zero-downtime-api
 
-# 2. Watch the pods transition (Zero-Downtime in action)
+# 2. Watch the transition in real-time
 kubectl get pods -w
 
 ```
@@ -85,4 +77,7 @@ kubectl get pods -w
 * `GET /`: Returns system status and version.
 * `GET /health`: Health check endpoint used by Kubernetes Readiness Probes.
 
+```
+
 ---
+
