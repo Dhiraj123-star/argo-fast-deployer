@@ -77,5 +77,4 @@ kubectl get pods -w
 * `GET /`: Returns system status and version.
 * `GET /health`: Health check endpoint used by Kubernetes Readiness Probes.
 
-```
 
