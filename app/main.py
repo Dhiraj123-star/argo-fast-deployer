@@ -20,6 +20,6 @@ def get_status():
     return {
         "database": "connected",
         "cache": "active",
-        "uptime": "99.9%"
+        "uptime": "100%" # Fixed from 99.9% to 100%
 
     }
