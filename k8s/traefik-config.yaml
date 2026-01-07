@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: zero-downtime-ingress
+  annotations:
+    # Traefik specific annotations
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  ingressClassName: traefik  # <--- Make sure this matches 'kubectl get ingress'
+  tls:
+  - hosts:
+    - fastapi.local
+    secretName: fastapi-tls-secret
+  rules:
+  - host: fastapi.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: zero-downtime-service
+            port:
+              number: 80
