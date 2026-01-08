@@ -7,82 +7,75 @@ A production-ready boilerplate for a **FastAPI** application, containerized with
 
 * **Backend:** FastAPI (Python 3.11)
 * **Ingress Controller:** Traefik
-* **Security:** SSL/TLS (Self-Signed) & Automated HTTPS Redirection
+* **Security:** SSL/TLS & Automated HTTPS Redirection
 * **Containerization:** Docker
-* **CI/CD:** GitHub Actions & Docker Hub
 * **Orchestration:** Kubernetes (Minikube/Managed K8s)
 
 ---
 
 ## 📂 Project Structure
 
-* `app/`: FastAPI source code (includes `/health` for readiness checks).
-* `k8s/manifests.yaml`: Core Deployment and Service definitions.
-* `k8s/traefik-config.yaml`: Ingress rules and TLS termination settings.
-* `k8s/traefik-middleware.yaml`: Middleware for HTTP-to-HTTPS redirection.
-* `.github/workflows/`: Automated CI/CD pipeline for Docker Hub.
+* `app/`: FastAPI source code.
+* `k8s/manifests.yaml`: Core Deployment, Service, and Probe definitions.
+* `k8s/traefik-config.yaml`: Ingress rules and TLS settings.
+* `k8s/traefik-middleware.yaml`: HTTPS redirection logic.
+* `k8s/configmap.yaml`: Centralized application configuration.
 
 ---
 
 ## 🚀 Key Features Implemented
 
-### 1. Zero-Downtime Strategy
+### 1. Self-Healing & Availability
 
-* **RollingUpdate:** Replaces pods gradually ensuring 100% availability.
-* **Readiness Probes:** Traefik only routes traffic to pods once the FastAPI `/health` check passes.
+* **RollingUpdate:** Zero-downtime pod rotation.
+* **Readiness Probes:** Ensures pods are ready before receiving traffic.
+* **Liveness Probes:** Automatically restarts unhealthy containers.
 
-### 2. Modern Ingress with Traefik
+### 2. Modern Ingress & Security
 
-* **HTTPS/TLS:** Secured communication using a Kubernetes TLS Secret.
-* **Automatic Redirection:** Custom Traefik Middleware to force all `HTTP` (Port 80) traffic to `HTTPS` (Port 443).
-* **Host-based Routing:** Traffic is routed via `https://fastapi.local`.
-* **Traefik Dashboard:** Visual monitoring of routers, services, and entrypoints.
+* **Traefik Ingress:** Managed traffic routing with SSL termination.
+* **HTTPS Redirection:** Middleware-driven 301 redirects from port 80 to 443.
 
-### 3. Automated CI/CD
+### 3. Decoupled Configuration
 
-* **GitHub Actions:** Every push to `main` triggers an automated build and push to `dhiraj918106/zero-downtime-api:latest`.
+* **ConfigMaps:** Environment-specific variables (APP_ENV, LOG_LEVEL) are injected at runtime, keeping the Docker image generic and portable.
 
 ---
 
 ## 🛠 How to Run
 
-### 1. Generate SSL Certificates
+### 1. Setup Secrets & Config
 
 ```bash
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-  -keyout tls.key -out tls.crt \
-  -subj "/CN=fastapi.local"
-
+# Generate SSL Secret
 kubectl create secret tls fastapi-tls-secret --cert=tls.crt --key=tls.key
+
+# Apply Configuration
+kubectl apply -f k8s/configmap.yaml
 
 ```
 
-### 2. Deploy to Kubernetes
+### 2. Deploy
 
 ```bash
-# Apply standard manifests
 kubectl apply -f k8s/manifests.yaml
-
-# Apply Traefik Middleware (Redirection)
 kubectl apply -f k8s/traefik-middleware.yaml
-
-# Apply Traefik Ingress configuration
 kubectl apply -f k8s/traefik-config.yaml
 
 ```
 
-### 3. Accessing the Application
+### 3. Verify Environment Variables
 
-1. Start the Minikube tunnel: `minikube tunnel`
-2. Map the domain in `/etc/hosts`: `127.0.0.1 fastapi.local`
-3. Visit: `http://fastapi.local` (It will automatically redirect to `https://fastapi.local`).
+```bash
+kubectl exec <pod-name> -- env | grep APP_
+
+```
 
 ---
 
 ## 🔗 API Endpoints
 
-* `GET /`: Returns system status and version.
-* `GET /status`: Detailed system health and uptime.
-* `GET /health`: Kubernetes Liveness/Readiness probe endpoint.
+* `GET /`: System status.
+* `GET /health`: Health check endpoint (Liveness/Readiness).
 
 ---
