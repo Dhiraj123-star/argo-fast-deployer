@@ -3,11 +3,12 @@ kind: Ingress
 metadata:
   name: zero-downtime-ingress
   annotations:
-    # Traefik specific annotations
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    traefik.ingress.kubernetes.io/router.tls: "true"
+    # 1. Enable both HTTP (web) and HTTPS (websecure) entrypoints
+    traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
+    # 2. Attach the middleware (Name must match your middleware manifest)
+    traefik.ingress.kubernetes.io/router.middlewares: default-redirect-https@kubernetescrd
 spec:
-  ingressClassName: traefik  # <--- Make sure this matches 'kubectl get ingress'
+  ingressClassName: traefik
   tls:
   - hosts:
     - fastapi.local
