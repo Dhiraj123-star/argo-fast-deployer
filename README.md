@@ -7,7 +7,7 @@ A production-ready boilerplate for a **FastAPI** application, containerized with
 
 * **Backend:** FastAPI (Python 3.11)
 * **Ingress Controller:** Traefik
-* **Security:** SSL/TLS (Self-Signed Certificates)
+* **Security:** SSL/TLS (Self-Signed) & Automated HTTPS Redirection
 * **Containerization:** Docker
 * **CI/CD:** GitHub Actions & Docker Hub
 * **Orchestration:** Kubernetes (Minikube/Managed K8s)
@@ -19,8 +19,8 @@ A production-ready boilerplate for a **FastAPI** application, containerized with
 * `app/`: FastAPI source code (includes `/health` for readiness checks).
 * `k8s/manifests.yaml`: Core Deployment and Service definitions.
 * `k8s/traefik-config.yaml`: Ingress rules and TLS termination settings.
+* `k8s/traefik-middleware.yaml`: Middleware for HTTP-to-HTTPS redirection.
 * `.github/workflows/`: Automated CI/CD pipeline for Docker Hub.
-* `test-rollout.sh`: Script to verify zero-downtime during updates.
 
 ---
 
@@ -34,6 +34,7 @@ A production-ready boilerplate for a **FastAPI** application, containerized with
 ### 2. Modern Ingress with Traefik
 
 * **HTTPS/TLS:** Secured communication using a Kubernetes TLS Secret.
+* **Automatic Redirection:** Custom Traefik Middleware to force all `HTTP` (Port 80) traffic to `HTTPS` (Port 443).
 * **Host-based Routing:** Traffic is routed via `https://fastapi.local`.
 * **Traefik Dashboard:** Visual monitoring of routers, services, and entrypoints.
 
@@ -62,6 +63,9 @@ kubectl create secret tls fastapi-tls-secret --cert=tls.crt --key=tls.key
 # Apply standard manifests
 kubectl apply -f k8s/manifests.yaml
 
+# Apply Traefik Middleware (Redirection)
+kubectl apply -f k8s/traefik-middleware.yaml
+
 # Apply Traefik Ingress configuration
 kubectl apply -f k8s/traefik-config.yaml
 
@@ -71,14 +75,14 @@ kubectl apply -f k8s/traefik-config.yaml
 
 1. Start the Minikube tunnel: `minikube tunnel`
 2. Map the domain in `/etc/hosts`: `127.0.0.1 fastapi.local`
-3. Visit: `https://fastapi.local`
+3. Visit: `http://fastapi.local` (It will automatically redirect to `https://fastapi.local`).
 
 ---
 
 ## 🔗 API Endpoints
 
 * `GET /`: Returns system status and version.
-* `GET /status`: Detailed system health and uptime (added via feature branch).
+* `GET /status`: Detailed system health and uptime.
 * `GET /health`: Kubernetes Liveness/Readiness probe endpoint.
 
 ---
